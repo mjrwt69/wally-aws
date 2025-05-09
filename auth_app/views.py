@@ -76,7 +76,9 @@ def profile_view(request):
 
         if action == 'delete':
             image = get_object_or_404(Post_Wallpaper, id=image_id, user=request.user)
-            image.delete()
+            if image.image:  # Check if there's an image associated
+                image.image.delete(save=False)  # delete the image from storage
+            image.delete()  # Delete the image record from the database
             return redirect('profile')
 
     return render(request, 'profile.html', {'uploaded_images': uploaded_images})

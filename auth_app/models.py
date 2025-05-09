@@ -2,11 +2,12 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
+from auth_app.storage import MediaStorage
 import os
 
 class Post_Wallpaper(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)  # Link to the user who uploaded the image
-    image = models.ImageField(upload_to='uploads/')  # Upload directory for images
+    image = models.ImageField(storage=MediaStorage(), upload_to='uploads/')  # Upload directory for images
     description = models.TextField(default=None)  # Field for the image description
     created_at = models.DateTimeField(auto_now_add=True)  # Timestamp of upload
 
