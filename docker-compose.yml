@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  django:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app  # Bind the entire app directory into the container
+      - "C:/Users/manorawa/Downloads/Wallpapers/Wallpapers/wally/db.sqlite3:/app/db.sqlite3"  # Bind a specific file from your home directory
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=True
