@@ -4,16 +4,16 @@
 {% block extra_css %}
 <style>
   #loading {
-      display: none;
-      text-align: center;
-      padding: 20px;
+    display: none;
+    text-align: center;
+    padding: 20px;
   }
 </style>
 {% endblock extra_css %}
 
 {% block content %}
-
 <link rel="stylesheet" href="{% static 'css/home.css' %}">
+
 <div class="masonry-container" id="masonry-container">
   {% include "image_list.html" %}
 </div>
@@ -22,13 +22,24 @@
   <div class="spinner-border text-primary" role="status">
     <span class="visually-hidden">Loading...</span>
   </div>
+</div>
 
+<!-- Bootstrap Modal -->
+<div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content" style="background-color: rgba(0, 0, 0, 0.5); border: none; box-shadow: none;">
+      <div class="modal-body p-0 text-center" style="background-color: transparent;">
+        <img src="" id="modalImage" class="img-fluid mx-auto d-block" style="max-height: 90vh; object-fit: contain;" alt="Full image">
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
   let page = 2;
   let loading = false;
   let hasNext = "{{ page_obj.has_next|yesno:'true,false' }}".toLowerCase() === 'true';
+
   async function loadMoreImages() {
     if (!hasNext || loading) return;
     loading = true;
@@ -43,6 +54,7 @@
 
       const data = await response.json();
       document.getElementById('masonry-container').insertAdjacentHTML('beforeend', data.images_html);
+      attachModalListeners();  // Re-bind modal clicks
       hasNext = data.has_next;
       page += 1;
     } catch (error) {
@@ -51,17 +63,32 @@
       loading = false;
       document.getElementById('loading').style.display = 'none';
     }
+
     if (!hasNext) {
-      // ✅ Optional: remove event listener or show "no more" message
       window.removeEventListener('scroll', handleScroll);
     }
   }
 
-  window.addEventListener('scroll', () => {
+  function handleScroll() {
     if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 200) {
       loadMoreImages();
     }
+  }
+
+  function attachModalListeners() {
+    document.querySelectorAll('.img-clickable').forEach(img => {
+      img.addEventListener('click', () => {
+        const fullSrc = img.getAttribute('data-full');
+        document.getElementById('modalImage').src = fullSrc;
+        const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+        modal.show();
+      });
+    });
+  }
+
+  window.addEventListener('load', () => {
+    attachModalListeners();
+    window.addEventListener('scroll', handleScroll);
   });
 </script>
-
 {% endblock %}

@@ -1,10 +1,11 @@
 {% for image in uploaded_images %}
   <div class="masonry-item">
-    <img 
-      src="{{ image.image.url }}" 
-      class="masonry-img" 
-      alt="{{ image.description|default:'Uploaded image' }}" 
-      loading="lazy">
+    <img
+      src="{{ image.image.url }}"
+      class="img-thumbnail img-clickable"
+      data-full="{{ image.image.url }}"
+      style="cursor: pointer;"
+    />
     <a href="{{ image.image.url }}" download class="download-btn">Download</a>
   </div>
 {% endfor %}
