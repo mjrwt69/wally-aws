@@ -21,11 +21,12 @@ from django.urls import path, include
 
 import auth_app.urls
 from . import views
+from .views import home
 import auth_app
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.home, name='home'),
+    path('', home.as_view(), name='home'),
     path('', include(auth_app.urls)),
     path("__reload__/", include("django_browser_reload.urls")),
 

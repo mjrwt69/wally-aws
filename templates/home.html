@@ -1,23 +1,67 @@
 {% extends "layout.html" %}
 {% load static %}
 
+{% block extra_css %}
+<style>
+  #loading {
+      display: none;
+      text-align: center;
+      padding: 20px;
+  }
+</style>
+{% endblock extra_css %}
+
 {% block content %}
 
 <link rel="stylesheet" href="{% static 'css/home.css' %}">
-<div class="masonry-container">
-  {% if uploaded_images %}
-    {% for image in uploaded_images %}
-      <div class="masonry-item">
-        <img 
-          src="{{ image.image.url }}" 
-          class="masonry-img" 
-          alt="{{ image.description|default:'Uploaded image' }}" 
-          loading="lazy">
-        <a href="{{ image.image.url }}" download class="download-btn">Download</a>
-      </div>
-    {% endfor %}
-  {% else %}
-    <p>No images uploaded yet.</p>
-  {% endif %}
+<div class="masonry-container" id="masonry-container">
+  {% include "image_list.html" %}
 </div>
+
+<div id="loading">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+
+</div>
+
+<script>
+  let page = 2;
+  let loading = false;
+  let hasNext = "{{ page_obj.has_next|yesno:'true,false' }}".toLowerCase() === 'true';
+  async function loadMoreImages() {
+    if (!hasNext || loading) return;
+    loading = true;
+    document.getElementById('loading').style.display = 'block';
+
+    try {
+      const response = await fetch(`?page=${page}`, {
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      });
+
+      const data = await response.json();
+      document.getElementById('masonry-container').insertAdjacentHTML('beforeend', data.images_html);
+      hasNext = data.has_next;
+      page += 1;
+    } catch (error) {
+      console.error('Error loading more images:', error);
+    } finally {
+      loading = false;
+      document.getElementById('loading').style.display = 'none';
+    }
+    if (!hasNext) {
+      // ✅ Optional: remove event listener or show "no more" message
+      window.removeEventListener('scroll', handleScroll);
+    }
+  }
+
+  window.addEventListener('scroll', () => {
+    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 200) {
+      loadMoreImages();
+    }
+  });
+</script>
+
 {% endblock %}

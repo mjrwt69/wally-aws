@@ -17,7 +17,7 @@
 }
 @media (max-width: 576px) {
   .masonry-container {
-    column-count: 1;
+    column-count: 2;
   }
 }
 
